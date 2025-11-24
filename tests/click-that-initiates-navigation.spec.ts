@@ -60,7 +60,7 @@ test("Approach 2: Promise-first (classic race condition safe)", async ({
 });
 
 
-test("Approach 1: Sequential await (click then wait)", async ({page}) => {
+test("Approach 3: Sequential await (click then wait) but to wait correct response, not page url", async ({page}) => {
   console.log("\n=== APPROACH 3: Sequential await ===");
   console.log("This clicks, waits for response but wait for request that related to the target page");
 
@@ -76,7 +76,7 @@ test("Approach 1: Sequential await (click then wait)", async ({page}) => {
     )
     .click();
 
-  console.log(`[${new Date().toISOString()}] TEST: Waiting for correct request response...`);
+  console.log(`[${new Date().toISOString()}] TEST: Waiting for CORRECT request response...`);
   const response = await page.waitForResponse("**/top50.csv")
 
   const endTime = Date.now();
