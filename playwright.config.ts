@@ -13,9 +13,14 @@ export default defineConfig({
   use: {
     headless: false,
     baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
+    trace: 'on',
     screenshot: 'only-on-failure',
     testIdAttribute: 'data-test-id',
+    permissions: ['geolocation', "local-network-access"],
+    geolocation: {
+      longitude: -2.608990393252965,
+      latitude: 51.46031842336688
+    },
   },
 
   projects: [
