@@ -9,6 +9,7 @@ test('Sequential await (click then wait) without NAVIGATION', async ({page}) => 
   await frameLocator.locator("#password").fill("alsdkfjlasdkjf@asdfkj.com")
   await frameLocator.locator("#kc-form-buttons").click()
 
+
   await page.waitForResponse(response =>
     response.url().includes("login-actions/authenticate")
   );

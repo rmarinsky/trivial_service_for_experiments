@@ -1,13 +1,13 @@
-import { test, expect } from '@playwright/test';
-import { faker } from '@faker-js/faker';
+import {expect, test} from '@playwright/test';
+import {faker} from '@faker-js/faker';
 
 test.describe('User Creation Response Handling', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({page}) => {
     // Navigate to the page before each test
     await page.goto('http://localhost:3000');
   });
 
-  test('Approach 1: Sequential await (click then wait)', async ({ page }) => {
+  test('Approach 1: Sequential await (click then wait)', async ({page}) => {
     console.log('\n=== APPROACH 1: Sequential await ===');
     console.log('This approach clicks first, then waits for response');
 
@@ -46,7 +46,7 @@ test.describe('User Creation Response Handling', () => {
     await expect(page.getByTestId('username-value')).toHaveText(username);
   });
 
-  test('Approach 2: Promise-first (classic race condition safe)', async ({ page }) => {
+  test('Approach 2: Promise-first (classic race condition safe)', async ({page}) => {
     console.log('\n=== APPROACH 2: Promise-first ===');
     console.log('This approach sets up waitForResponse before clicking');
 
@@ -88,7 +88,7 @@ test.describe('User Creation Response Handling', () => {
     await expect(page.getByTestId('username-value')).toHaveText(username);
   });
 
-  test('Stress test: Multiple rapid submissions with sequential await', async ({ page }) => {
+  test('Stress test: Multiple rapid submissions with sequential await', async ({page}) => {
     console.log('\n=== STRESS TEST: Sequential await approach ===');
     console.log('Testing 3 rapid submissions to see if any responses are missed');
 
@@ -121,7 +121,7 @@ test.describe('User Creation Response Handling', () => {
     console.log('\nAll submissions completed successfully!');
   });
 
-  test('Edge case: Very slow network simulation', async ({ page, context }) => {
+  test('Edge case: Very slow network simulation', async ({page, context}) => {
     console.log('\n=== EDGE CASE: Slow network ===');
 
     // Simulate slower network
@@ -156,7 +156,7 @@ test.describe('User Creation Response Handling', () => {
     await expect(page.getByTestId('success-message')).toBeVisible();
   });
 
-  test('Verify response headers (X-Request-ID)', async ({ page }) => {
+  test('Verify response headers (X-Request-ID)', async ({page}) => {
     console.log('\n=== VERIFY CUSTOM HEADERS ===');
 
     // Generate random user data
@@ -177,4 +177,22 @@ test.describe('User Creation Response Handling', () => {
     expect(requestId).toBeTruthy();
     expect(requestId).toMatch(/^req-\d+-[a-z0-9]+$/);
   });
+
+
+  test("Server side rendering example",
+    async ({page}) => {
+      const username = faker.internet.username();
+      const email = faker.internet.email();
+      console.log(`Generated username: ${username}, email: ${email}`);
+
+      await page.goto("http://localhost:3000/ssr")
+      await page.getByTestId('username-input').fill(username);
+      await page.getByTestId('email-input').fill(email);
+
+      await page.getByTestId('submit-button').click();
+
+      const response = await page.waitForResponse('**/ssr');
+      expect(response.status()).toBe(303)
+    }
+  );
 });

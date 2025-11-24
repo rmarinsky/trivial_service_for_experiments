@@ -1,4 +1,4 @@
-import {test, expect} from "@playwright/test";
+import {expect, test} from "@playwright/test";
 
 test("Approach 1: Sequential await (click then wait)", async ({page}) => {
   console.log("\n=== APPROACH 1: Sequential await ===");
@@ -17,7 +17,7 @@ test("Approach 1: Sequential await (click then wait)", async ({page}) => {
     .click();
 
   console.log(`[${new Date().toISOString()}] TEST: Waiting for response...`);
-  // but it will not work, cos is's navigation urrl not request response, perhaps... LOOK INTO APPROACH 3
+  // but it will not work, cos is's navigation url not request response, perhaps... LOOK INTO APPROACH 3
   const response = await page.waitForResponse(
     "**/top-50-summer-2025/?from=doufp"
   );

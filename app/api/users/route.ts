@@ -11,9 +11,18 @@ interface CreateUserRequest {
   email: string;
 }
 
-function validateUserInput(body: unknown): body is CreateUserRequest {
-  const data = body as Partial<CreateUserRequest>;
-  return Boolean(data?.username && data?.email);
+function isValidUserInput(body: unknown): body is CreateUserRequest {
+  if (!body || typeof body !== 'object') {
+    return false;
+  }
+
+  const data = body as Record<string, unknown>;
+  return (
+    typeof data.username === 'string' &&
+    typeof data.email === 'string' &&
+    data.username.trim().length > 0 &&
+    data.email.trim().length > 0
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -25,15 +34,18 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    if (!validateUserInput(body)) {
+    if (!isValidUserInput(body)) {
+      const duration = Date.now() - requestStartTime;
+      logger.log(`Validation failed - Request ID: ${requestId}, Duration: ${duration}ms`);
+
       return NextResponse.json<Omit<ApiResponse, 'user'>>(
         {
           success: false,
-          error: 'Username and email are required',
+          error: 'Username and email are required and cannot be empty',
           timestamp: Date.now(),
-          requestDuration: Date.now() - requestStartTime
+          requestDuration: duration,
         },
-        { status: 400 }
+        { status: 400, headers: { 'X-Request-ID': requestId } }
       );
     }
 
@@ -41,17 +53,15 @@ export async function POST(request: NextRequest) {
 
     const newUser: User = {
       id: generateId('user'),
-      username,
-      email,
+      username: username.trim(),
+      email: email.trim(),
       createdAt: Date.now(),
     };
 
     users.push(newUser);
 
-    const requestEndTime = Date.now();
-    const duration = requestEndTime - requestStartTime;
-
-    logger.log(`Response sent - Request ID: ${requestId}, Duration: ${duration}ms`);
+    const duration = Date.now() - requestStartTime;
+    logger.log(`User created - Request ID: ${requestId}, Duration: ${duration}ms`);
 
     return NextResponse.json<ApiResponse>(
       {
@@ -68,13 +78,15 @@ export async function POST(request: NextRequest) {
       }
     );
   } catch (error) {
+    const duration = Date.now() - requestStartTime;
     logger.error(`Error - Request ID: ${requestId}`, error);
+
     return NextResponse.json<Omit<ApiResponse, 'user'>>(
       {
         success: false,
         error: 'Internal server error',
         timestamp: Date.now(),
-        requestDuration: Date.now() - requestStartTime
+        requestDuration: duration,
       },
       { status: 500, headers: { 'X-Request-ID': requestId } }
     );
